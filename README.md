@@ -2,15 +2,7 @@
 
 A minimal chat interface powered by AWS Bedrock Knowledge Base, built with FastAPI and vanilla JavaScript.
 
-## Features
-
-- Simple chat interface with conversation history
-- AWS Bedrock Knowledge Base integration
-- Optimistic UI for instant feedback
-- Local storage for conversation persistence
-- Docker support for local development
-- AWS Lambda + API Gateway deployment for backend
-- S3 + CloudFront deployment for frontend
+![Production Demo](docs/prod_demo.png)
 
 ## Quick Start
 
@@ -51,6 +43,8 @@ A minimal chat interface powered by AWS Bedrock Knowledge Base, built with FastA
    Wait a few minutes for the sync to complete.
 
    Optional: Test the knowledge base in the AWS Console dashboard.
+
+   ![Knowledge Base Sync](docs/test_kb.png)
 
 5. **Deploy Backend stack**
    ```bash
