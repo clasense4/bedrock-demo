@@ -1,35 +1,45 @@
-version: '3.8'
+version: "3.8"
 
 services:
   backend:
-    build: .
-    container_name: bedrock-backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bedrock-chat-backend
     ports:
       - "8000:8000"
     environment:
+      # AWS Configuration
       - AWS_REGION=${AWS_REGION:-us-east-1}
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - KNOWLEDGE_BASE_ID=${KNOWLEDGE_BASE_ID}
-      - BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID:-amazon.titan-text-express-v1}
+      # Application Configuration
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost:8080}
+      - API_PORT=8000
+      # Model Configuration
+      - BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID:-amazon.titan-text-express-v1}
     volumes:
+      # Mount source code for development
       - ./src:/app/src
-    networks:
-      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   frontend:
-    image: python:3.12-slim
-    container_name: bedrock-frontend
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: bedrock-chat-frontend
     ports:
       - "8080:8080"
     volumes:
-      - ./src/frontend:/app
-    working_dir: /app
-    command: python -m http.server 8080
-    networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge
+      # Mount frontend files for development
+      - ./src/frontend:/app/frontend
+    restart: unless-stopped
+    depends_on:
+      - backend

@@ -1,0 +1,14 @@
+# Use Python 3.12 base image for simple HTTP server
+FROM python:3.12-slim
+
+# Set working directory
+WORKDIR /app
+
+# Copy frontend files
+COPY src/frontend/ ./frontend/
+
+# Expose port 8080
+EXPOSE 8080
+
+# Run simple HTTP server
+CMD ["python", "-m", "http.server", "8080", "--directory", "frontend"]
