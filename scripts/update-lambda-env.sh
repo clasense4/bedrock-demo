@@ -18,12 +18,6 @@ else
     echo "  Create .env.prod from .env.prod.example"
 fi
 
-# Get CloudFront URL if available
-FRONTEND_URL=""
-if [ -f scripts/prod-frontend-info.txt ]; then
-    FRONTEND_URL=$(grep "CloudFront URL:" scripts/prod-frontend-info.txt | cut -d: -f2- | tr -d ' ')
-fi
-
 # Check if KNOWLEDGE_BASE_ID is set
 if [ -z "$KNOWLEDGE_BASE_ID" ]; then
     echo ""
@@ -43,7 +37,6 @@ aws lambda update-function-configuration \
     --environment "Variables={
         KNOWLEDGE_BASE_ID=$KNOWLEDGE_BASE_ID,
         BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID:-nova-micro-v1:0},
-        FRONTEND_URL=${FRONTEND_URL:-*},
         LOG_LEVEL=${LOG_LEVEL:-INFO}
     }" \
     --region "$REGION" \
@@ -54,5 +47,4 @@ echo "✓ Environment variables updated"
 echo "  AWS_REGION: $REGION"
 echo "  KNOWLEDGE_BASE_ID: $KNOWLEDGE_BASE_ID"
 echo "  BEDROCK_MODEL_ID: ${BEDROCK_MODEL_ID:-nova-micro-v1:0}"
-echo "  FRONTEND_URL: ${FRONTEND_URL:-*}"
 echo "  LOG_LEVEL: ${LOG_LEVEL:-INFO}"

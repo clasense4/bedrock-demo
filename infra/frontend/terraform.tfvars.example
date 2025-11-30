@@ -1,0 +1,24 @@
+# Frontend Infrastructure Configuration
+
+# Stack name (used for resource naming)
+stack_name = "bedrock-chat-prod"
+
+# AWS region
+region = "us-east-1"
+
+# S3 bucket name (leave empty to auto-generate: {stack_name}-frontend)
+s3_bucket_name = ""
+
+# CloudFront price class
+# PriceClass_100: US, Canada, Europe
+# PriceClass_200: US, Canada, Europe, Asia, Middle East, Africa (recommended for Indonesia)
+# PriceClass_All: All edge locations
+cloudfront_price_class = "PriceClass_200"
+
+# Enable CloudFront (set to false for faster deployment during development)
+# When disabled, uses S3 website URL directly (no CDN, but deploys in ~30 seconds)
+enable_cloudfront = true
+
+# API Gateway endpoint (optional - automatically read from backend state)
+# Only set this if you want to override the backend endpoint
+# api_gateway_endpoint = "https://your-api-id.execute-api.us-east-1.amazonaws.com"

@@ -1,0 +1,18 @@
+# Backend Infrastructure Configuration
+# Copy this file to terraform.tfvars and fill in your values
+
+stack_name         = "bedrock-chat-prod"
+region             = "us-east-1"
+
+# Knowledge Base ID - leave empty to auto-detect from ../bedrock/terraform.tfstate
+# or set manually if you deployed Bedrock separately
+knowledge_base_id  = ""
+
+bedrock_model_id   = "amazon.nova-micro-v1:0"
+log_level          = "INFO"
+frontend_url       = "*"
+
+# Lambda Configuration
+lambda_runtime     = "python3.12"
+lambda_timeout     = 30
+lambda_memory_size = 512

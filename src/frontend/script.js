@@ -5,9 +5,10 @@ const messageLog = document.getElementById('message-log');
 const thinkingIndicator = document.getElementById('thinking-indicator');
 
 // Configure API base URL for local vs production
+// In production, this will be replaced by the deployment script with the actual API Gateway endpoint
 const API_BASE_URL = window.location.hostname === 'localhost'
     ? 'http://localhost:8000'
-    : window.location.origin;
+    : (window.API_GATEWAY_ENDPOINT || window.location.origin);
 
 // LocalStorage key for chat history
 const CHAT_HISTORY_KEY = 'chat_history';

@@ -1,6 +1,6 @@
 .PHONY: help build up down logs clean install test lambda-package lambda-clean
-.PHONY: prod-preparation prod-backend-bootstrap prod-backend-build prod-backend-deploy
-.PHONY: prod-frontend-bootstrap prod-frontend-deploy prod-backend-destroy prod-frontend-destroy
+.PHONY: prod-preparation prod-backend-build prod-backend-deploy prod-backend-update-env
+.PHONY: prod-frontend-deploy
 
 # Production Configuration
 PROD_STACK_NAME ?= bedrock-chat-prod
@@ -20,13 +20,20 @@ help:
 	@echo ""
 	@echo "Production deployment commands:"
 	@echo "  make prod-preparation       - Check AWS credentials and environment"
-	@echo "  make prod-backend-bootstrap - Create API Gateway & Lambda"
 	@echo "  make prod-backend-build     - Build Lambda deployment package"
-	@echo "  make prod-backend-deploy    - Deploy Lambda package"
-	@echo "  make prod-frontend-bootstrap - Create S3 & CloudFront"
+	@echo "  make prod-backend-deploy    - Deploy Lambda code only"
+	@echo "  make prod-backend-update-env - Update Lambda environment variables"
 	@echo "  make prod-frontend-deploy   - Deploy frontend to S3 & invalidate cache"
-	@echo "  make prod-backend-destroy   - Delete all backend resources (with confirmation)"
-	@echo "  make prod-frontend-destroy  - Delete all frontend resources (with confirmation)"
+	@echo ""
+	@echo "Terraform backend (replaces prod-backend-bootstrap):"
+	@echo "  cd infra/backend && terraform init   - Initialize Terraform"
+	@echo "  cd infra/backend && terraform plan   - Preview changes"
+	@echo "  cd infra/backend && terraform apply  - Deploy infrastructure"
+	@echo ""
+	@echo "Terraform frontend (replaces prod-frontend-bootstrap):"
+	@echo "  cd infra/frontend && terraform init   - Initialize Terraform"
+	@echo "  cd infra/frontend && terraform plan   - Preview changes"
+	@echo "  cd infra/frontend && terraform apply  - Deploy infrastructure"
 	@echo ""
 
 build:
@@ -99,20 +106,8 @@ prod-backend-build:
 	@echo "✓ Lambda package created: lambda-package.zip"
 	@echo "✓ Package size: $$(du -h lambda-package.zip | cut -f1)"
 
-prod-backend-bootstrap:
-	@echo "=== Bootstrapping Production Backend ==="
-	@echo ""
-	@echo "Creating IAM role for Lambda..."
-	@bash scripts/create-lambda-role.sh $(PROD_STACK_NAME)
-	@echo ""
-	@echo "Creating Lambda function..."
-	@bash scripts/create-lambda.sh $(PROD_LAMBDA_NAME) $(PROD_STACK_NAME) $(PROD_REGION)
-	@echo ""
-	@echo "Creating API Gateway..."
-	@bash scripts/create-api-gateway.sh $(PROD_API_NAME) $(PROD_LAMBDA_NAME) $(PROD_REGION)
-	@echo ""
-	@echo "=== Backend bootstrap complete! ==="
-	@echo "Check scripts/prod-backend-info.txt for API endpoint and details"
+# Note: prod-backend-bootstrap has been replaced by Terraform
+# Use: cd infra/backend && terraform apply
 
 prod-backend-deploy:
 	@echo "=== Deploying Lambda Package ==="
@@ -128,27 +123,19 @@ prod-backend-deploy:
 		--output json > /tmp/lambda-update.json
 	@echo "✓ Lambda code updated"
 	@echo ""
-	@echo "Updating Lambda environment variables..."
-	@bash scripts/update-lambda-env.sh $(PROD_LAMBDA_NAME) $(PROD_REGION)
-	@echo ""
 	@echo "Waiting for Lambda to be ready..."
 	@aws lambda wait function-updated --function-name $(PROD_LAMBDA_NAME) --region $(PROD_REGION)
 	@echo "✓ Lambda deployment complete!"
 	@echo ""
 	@echo "Function ARN: $$(cat /tmp/lambda-update.json | grep -o '"FunctionArn": "[^"]*' | cut -d'"' -f4)"
 
-prod-frontend-bootstrap:
-	@echo "=== Bootstrapping Production Frontend ==="
+prod-backend-update-env:
+	@echo "=== Updating Lambda Environment Variables ==="
+	@bash scripts/update-lambda-env.sh $(PROD_LAMBDA_NAME) $(PROD_REGION)
 	@echo ""
-	@echo "Creating S3 bucket..."
-	@bash scripts/create-s3-bucket.sh $(PROD_S3_BUCKET) $(PROD_REGION)
-	@echo ""
-	@echo "Creating CloudFront distribution..."
-	@bash scripts/create-cloudfront.sh $(PROD_S3_BUCKET) $(PROD_REGION)
-	@echo ""
-	@echo "=== Frontend bootstrap complete! ==="
-	@echo "Check scripts/prod-frontend-info.txt for CloudFront URL and details"
-	@echo "Note: CloudFront distribution takes 10-15 minutes to deploy"
+	@echo "Waiting for Lambda to be ready..."
+	@aws lambda wait function-updated --function-name $(PROD_LAMBDA_NAME) --region $(PROD_REGION)
+	@echo "✓ Environment variables updated!"
 
 prod-frontend-deploy:
 	@echo "=== Deploying Frontend ==="
@@ -167,10 +154,11 @@ prod-frontend-deploy:
 		--region $(PROD_REGION)
 	@echo "✓ Files synced to S3"
 	@echo ""
-	@if [ -f scripts/prod-frontend-info.txt ]; then \
-		DIST_ID=$$(grep "Distribution ID:" scripts/prod-frontend-info.txt | cut -d: -f2 | tr -d ' '); \
-		if [ -n "$$DIST_ID" ]; then \
-			echo "Invalidating CloudFront cache..."; \
+	@echo "Invalidating CloudFront cache..."
+	@if [ -d "infra/frontend" ]; then \
+		DIST_ID=$$(cd infra/frontend && terraform output -raw cloudfront_distribution_id 2>/dev/null); \
+		if [ -n "$$DIST_ID" ] && [ "$$DIST_ID" != "" ]; then \
+			echo "Distribution ID: $$DIST_ID"; \
 			aws cloudfront create-invalidation \
 				--distribution-id $$DIST_ID \
 				--paths "/*" \
@@ -178,10 +166,11 @@ prod-frontend-deploy:
 			echo "✓ Cache invalidation initiated"; \
 			echo "Invalidation ID: $$(cat /tmp/cf-invalidation.json | grep -o '"Id": "[^"]*' | head -1 | cut -d'"' -f4)"; \
 		else \
-			echo "⚠ Warning: CloudFront distribution ID not found. Skipping cache invalidation."; \
+			echo "⚠ Warning: CloudFront distribution ID not found in Terraform outputs"; \
+			echo "  Run 'cd infra/frontend && terraform apply' first"; \
 		fi \
 	else \
-		echo "⚠ Warning: prod-frontend-info.txt not found. Skipping cache invalidation."; \
+		echo "⚠ Warning: infra/frontend directory not found. Skipping cache invalidation."; \
 	fi
 	@echo ""
 	@rm -rf /tmp/frontend-deploy
@@ -189,42 +178,3 @@ prod-frontend-deploy:
 	@echo ""
 	@echo "=== Frontend deployment complete! ==="
 
-prod-backend-destroy:
-	@echo "=== WARNING: Backend Resource Destruction ==="
-	@echo ""
-	@echo "This will DELETE the following resources:"
-	@echo "  - Lambda function: $(PROD_LAMBDA_NAME)"
-	@echo "  - API Gateway: $(PROD_API_NAME)"
-	@echo "  - IAM role: $(PROD_STACK_NAME)-lambda-role"
-	@echo "  - IAM policy: $(PROD_STACK_NAME)-bedrock-policy"
-	@echo "  - CloudWatch logs: /aws/lambda/$(PROD_LAMBDA_NAME)"
-	@echo ""
-	@echo "Region: $(PROD_REGION)"
-	@echo ""
-	@read -p "Type 'DELETE' to confirm destruction: " confirm; \
-	if [ "$$confirm" != "DELETE" ]; then \
-		echo "Destruction cancelled."; \
-		exit 1; \
-	fi
-	@echo ""
-	@bash scripts/destroy-backend.sh $(PROD_LAMBDA_NAME) $(PROD_API_NAME) $(PROD_STACK_NAME) $(PROD_REGION)
-
-prod-frontend-destroy:
-	@echo "=== WARNING: Frontend Resource Destruction ==="
-	@echo ""
-	@echo "This will DELETE the following resources:"
-	@echo "  - S3 bucket: $(PROD_S3_BUCKET) (and all contents)"
-	@echo "  - CloudFront distribution"
-	@echo "  - CloudFront Origin Access Identity"
-	@echo ""
-	@echo "Region: $(PROD_REGION)"
-	@echo ""
-	@read -p "Type 'DELETE' to confirm destruction: " confirm; \
-	if [ "$$confirm" != "DELETE" ]; then \
-		echo "Destruction cancelled."; \
-		exit 1; \
-	fi
-	@echo ""
-	@bash scripts/destroy-frontend.sh $(PROD_S3_BUCKET) $(PROD_REGION)
-
-.PHONY: s3-create s3-deploy cf-create cf-invalidate deploy-frontend
