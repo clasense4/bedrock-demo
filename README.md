@@ -135,25 +135,6 @@ make deploy-frontend # Full frontend deployment
 - AWS Lambda + API Gateway (backend)
 - S3 + CloudFront (frontend)
 
-## Configuration
-
-### Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `AWS_REGION` | AWS region | `us-east-1` |
-| `AWS_ACCESS_KEY_ID` | AWS access key | - |
-| `AWS_SECRET_ACCESS_KEY` | AWS secret key | - |
-| `KNOWLEDGE_BASE_ID` | Bedrock Knowledge Base ID | - |
-| `BEDROCK_MODEL_ID` | Bedrock model | `amazon.titan-text-express-v1` |
-| `FRONTEND_URL` | Frontend URL for CORS | `http://localhost:8080` |
-
-## Documentation
-
-- [Lambda Deployment Guide](LAMBDA_DEPLOYMENT.md) - Backend deployment instructions
-- [Frontend Deployment Guide](FRONTEND_DEPLOYMENT.md) - Frontend deployment instructions
-- [Design Document](.kiro/specs/proof-of-concept/design.md) - Architecture and design details
-- [Requirements](.kiro/specs/proof-of-concept/requirements.md) - Feature requirements
 
 ## Development
 
@@ -170,18 +151,11 @@ make deploy-frontend # Full frontend deployment
 │   └── frontend/
 │       ├── index.html          # Chat interface
 │       └── script.js           # Frontend logic
-├── infra/                      # CDK infrastructure (optional)
 ├── docker-compose.yml          # Local development setup
 ├── Dockerfile                  # Backend container
 ├── Dockerfile.frontend         # Frontend container
 ├── Makefile                    # Build and deployment commands
 └── requirements.txt            # Python dependencies
-```
-
-### Running Tests
-
-```bash
-make test
 ```
 
 ## License
