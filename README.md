@@ -10,6 +10,13 @@ A minimal chat interface powered by AWS Bedrock Knowledge Base, built with FastA
 
 ### Production Deployment
 
+> Make sure you have installed the AWS CLI and Terraform.
+>
+> I'm using Terraform version 1.14.0.
+>
+> https://developer.hashicorp.com/terraform/install
+>
+
 1. **Connect to AWS via CLI**
 
    Option A - Configure default profile:
