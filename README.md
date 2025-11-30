@@ -14,82 +14,98 @@ A minimal chat interface powered by AWS Bedrock Knowledge Base, built with FastA
 
 ## Quick Start
 
+### Production Deployment
+
+1. **Connect to AWS via CLI**
+
+   Option A - Configure default profile:
+   ```bash
+   aws configure
+   ```
+
+   Option B - Use named profile:
+   ```bash
+   aws configure --profile your-profile-name
+   export AWS_PROFILE=your-profile-name
+   ```
+
+2. **Test AWS connection and prepare environment**
+   ```bash
+   make prod-preparation
+   ```
+
+3. **Deploy Bedrock Knowledge Base stack**
+   ```bash
+   cd infra/bedrock
+   terraform init
+   terraform apply --auto-approve
+   ```
+
+   Wait approximately 5 minutes for the stack to complete.
+
+4. **Sync the Knowledge Base data source**
+
+   Open AWS Console and manually sync the data source:
+   https://us-east-1.console.aws.amazon.com/bedrock/home?region=us-east-1#/knowledge-bases
+
+   Wait a few minutes for the sync to complete.
+
+   Optional: Test the knowledge base in the AWS Console dashboard.
+
+5. **Deploy Backend stack**
+   ```bash
+   cd ../backend
+   terraform init
+   terraform apply --auto-approve
+   ```
+
+   Test the API with curl (use the API Gateway URL from terraform output):
+   ```bash
+   curl -X POST "https://YOUR_API_ID.execute-api.us-east-1.amazonaws.com/api/chat" \
+     -H "Content-Type: application/json" \
+     -d '{"message": "what do you know about axrail?"}'
+   ```
+
+6. **Deploy Frontend stack**
+   ```bash
+   cd ../frontend
+   terraform init
+   terraform apply --auto-approve
+   ```
+
+   Wait approximately 5 minutes for CloudFront to be ready, then deploy the frontend files:
+   ```bash
+   cd ../..
+   make prod-frontend-deploy
+   ```
+
+   Open the CloudFront domain URL from the terraform output.
+
+7. **Destroy infrastructure (when needed)**
+
+   Run `terraform destroy --auto-approve` in each directory (frontend, backend, bedrock).
+
+   **Important:** Make sure to delete all S3 objects and versions before destroying.
+
 ### Local Development
 
 1. Copy environment variables:
-```bash
-cp .env.example .env
-```
+   ```bash
+   cp .env.example .env
+   ```
 
 2. Configure your AWS credentials and Knowledge Base ID in `.env`
 
 3. Start the application:
-```bash
-make up
-```
+   ```bash
+   make up
+   ```
 
 4. Access the application:
    - Frontend: http://localhost:8080
    - Backend API: http://localhost:8000
    - API Docs: http://localhost:8000/docs
 
-## Deployment
-
-### Backend Deployment (Lambda + API Gateway)
-
-See [LAMBDA_DEPLOYMENT.md](LAMBDA_DEPLOYMENT.md) for detailed instructions.
-
-Quick commands:
-```bash
-# Create Lambda deployment package
-make lambda-package
-
-# Deploy using AWS CLI or Console
-# See LAMBDA_DEPLOYMENT.md for full instructions
-```
-
-### Frontend Deployment (S3 + CloudFront)
-
-See [FRONTEND_DEPLOYMENT.md](FRONTEND_DEPLOYMENT.md) for detailed instructions.
-
-Quick commands:
-```bash
-# Create S3 bucket and configure for static hosting
-make s3-create
-
-# Deploy frontend files to S3
-make s3-deploy
-
-# Create CloudFront distribution
-make cf-create
-
-# Full deployment (after initial setup)
-make deploy-frontend CLOUDFRONT_DIST_ID=YOUR_DIST_ID
-```
-
-## Available Commands
-
-Run `make help` to see all available commands:
-
-```bash
-# Local development
-make build          # Build Docker containers
-make up             # Start the application
-make down           # Stop the application
-make logs           # View application logs
-make clean          # Remove containers and volumes
-
-# Backend deployment
-make lambda-package # Create Lambda deployment package
-make lambda-clean   # Remove Lambda build artifacts
-
-# Frontend deployment
-make s3-create      # Create S3 bucket for static hosting
-make s3-deploy      # Deploy frontend to S3
-make cf-create      # Create CloudFront distribution
-make cf-invalidate  # Invalidate CloudFront cache
-make deploy-frontend # Full frontend deployment
-```
 
 ## Architecture
 
@@ -134,34 +150,5 @@ make deploy-frontend # Full frontend deployment
 - Docker & Docker Compose (local)
 - AWS Lambda + API Gateway (backend)
 - S3 + CloudFront (frontend)
-
-
-## Development
-
-### Project Structure
-
-```
-.
-├── src/
-│   ├── backend/
-│   │   ├── fastapi_app.py      # FastAPI application
-│   │   ├── lambda_app.py       # Lambda handler
-│   │   └── services/
-│   │       └── chat_engine.py  # Bedrock integration
-│   └── frontend/
-│       ├── index.html          # Chat interface
-│       └── script.js           # Frontend logic
-├── docker-compose.yml          # Local development setup
-├── Dockerfile                  # Backend container
-├── Dockerfile.frontend         # Frontend container
-├── Makefile                    # Build and deployment commands
-└── requirements.txt            # Python dependencies
-```
-
-## License
-
-MIT
-
-## Support
-
-For issues or questions, please refer to the documentation or create an issue in the repository.
+- Terraform (AWS infrastructure)
+- Bedrock Knowledge Base
