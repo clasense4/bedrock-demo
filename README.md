@@ -4,6 +4,8 @@ A minimal chat interface powered by AWS Bedrock Knowledge Base, built with FastA
 
 ![Production Demo](docs/prod_demo.png)
 
+> Click here to download the screencast: [Production Demo](docs/prod_demo.mp4)
+
 ## Quick Start
 
 ### Production Deployment
@@ -92,7 +94,7 @@ A minimal chat interface powered by AWS Bedrock Knowledge Base, built with FastA
 
 ### Local Development
 
-Follow the steps above until you are deployed the Bedrock successfully, then follow the steps below to test the Bedrock in a local environment via Docker.
+Follow the steps above until you are deployed the Bedrock successfully, and tested the Bedrock in the AWS Console, then follow the steps below to test the Bedrock in a local environment via Docker.
 
 1. Copy environment variables:
    ```bash
@@ -104,6 +106,8 @@ Follow the steps above until you are deployed the Bedrock successfully, then fol
 3. Start the application:
    ```bash
    make up
+   # or
+   docker-compose up -d
    ```
 
 4. Access the application:
@@ -116,7 +120,7 @@ Follow the steps above until you are deployed the Bedrock successfully, then fol
 
 ![Diagram](docs/diagram.png)
 
-> For this demo, region us-east-1 is used because it has native support for Amazon Nova model.
+> For this demo, region us-east-1 is used because it has native support for Amazon Nova model and to avoid subscription to other models.
 
 **Frontend:**
 - HTML5, CSS3, Vanilla JavaScript
