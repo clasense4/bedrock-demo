@@ -98,6 +98,8 @@ A minimal chat interface powered by AWS Bedrock Knowledge Base, built with FastA
 
 ### Local Development
 
+Follow the steps above until you are deployed the Bedrock successfully, then follow the steps below to test the Bedrock in a local environment via Docker.
+
 1. Copy environment variables:
    ```bash
    cp .env.example .env
@@ -118,32 +120,9 @@ A minimal chat interface powered by AWS Bedrock Knowledge Base, built with FastA
 
 ## Architecture
 
-```
-┌─────────────────┐
-│   Web Browser   │
-│  (Chat UI)      │
-└────────┬────────┘
-         │ HTTP POST /api/chat
-         ▼
-┌─────────────────┐
-│  FastAPI        │
-│  Backend        │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Strands Agent   │
-│ (AWS Bedrock)   │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ AWS Bedrock     │
-│ Knowledge Base  │
-└─────────────────┘
-```
+![Diagram](docs/diagram.png)
 
-## Technology Stack
+> For this demo, region us-east-1 is used because it has native support for Amazon Nova model.
 
 **Frontend:**
 - HTML5, CSS3, Vanilla JavaScript
@@ -161,3 +140,39 @@ A minimal chat interface powered by AWS Bedrock Knowledge Base, built with FastA
 - S3 + CloudFront (frontend)
 - Terraform (AWS infrastructure)
 - Bedrock Knowledge Base
+
+### Explanation
+
+1. **Bedrock - Knowledgebase**
+
+   Bedrock [Knowledge Base](https://docs.aws.amazon.com/bedrock/latest/userguide/kb-how-it-works.html) currently have a preview feature to crawl the data automatically. It is not 100% bullet proof, sometimes the website owner could block the crawler. And there is robots.txt file to prevent the crawler.
+
+   The best condition maybe to combine multiple Bedrock [Data Source](https://docs.aws.amazon.com/bedrock/latest/userguide/kb-how-data.html), my suggestion is using S3 and Crawler.
+
+   S3 can enrich the data when the crawler blocked by the website owner. Markdown with metadata json is the best format to store the data on S3.
+
+2. **Lambda + API Gateway**
+
+   Lambda is the best choice to host the FastAPI backend. It is scalable and cost-effective.
+
+   API Gateway is the best choice to route the request to the Lambda function. It is scalable and cost-effective since it is serverless.
+
+   In some cases, this combination is more expensive than using an EC2 instance, especially the API Gateway. And lambda has a limit on the request size and limit to the timeout.
+
+   To cover this limitation, one solution is to combine with [Bedrock Prompt Caching](https://docs.aws.amazon.com/bedrock/latest/userguide/prompt-caching.html).
+
+3. **FastAPI**
+
+   FastAPI is the best choice to host the backend. It is one of the best Python frameworks for API development.
+
+   Using [Mangum](https://mangum.fastapiexpert.com/), FastAPI can be deployed to AWS Lambda and API Gateway.
+
+4. **Strands Agents**
+
+   [Strands Agents](https://strandsagents.com/latest/documentation/docs/user-guide/concepts/model-providers/amazon-bedrock/?h=bedrock#basic-usage) is a simple-to-use, code-first framework for building agents, and it has integration with AWS Bedrock.
+
+5. **S3 + CloudFront**
+
+   S3 is the best choice to store the static files. It is scalable and cost-effective.
+
+   CloudFront used to serve the static files from the S3 bucket. Cloudfront can cache the static files and serve them from the edge locations.
