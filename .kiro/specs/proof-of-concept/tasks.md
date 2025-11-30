@@ -166,9 +166,9 @@
     - Add AWS credential environment variables
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
 
-- [ ] 9. Create Lambda deployment configuration
+- [x] 9. Create Lambda deployment configuration
 
-  - [ ] 9.1 Write Lambda handler
+  - [x] 9.1 Write Lambda handler
 
     - Create `src/backend/lambda_app.py` as Lambda entry point
     - Adapt Lambda event format to FastAPI request
@@ -176,31 +176,24 @@
     - Handle Lambda context and response format
     - _Requirements: 6.1_
 
-  - [ ] 9.2 Create deployment package configuration
+  - [x] 9.2 Create deployment package configuration using Bash and Makefile
     - Create requirements file for Lambda dependencies
     - Configure Lambda-specific environment variables
     - Document deployment process
     - _Requirements: 7.4, 7.5_
 
-- [ ]\* 10. Write backend tests
+- [x] 10. Create S3 and Cloudfront deployment using Bash and Makefile
 
-  - Create pytest test suite for FastAPI endpoints
-  - Write unit tests for ChatEngine service
-  - Test request validation and error handling
-  - Mock AWS Bedrock calls for testing
-  - _Requirements: 6.1, 6.2, 6.3, 6.5_
+  - [x] 10.1 Create S3 bucket for deployment
 
-- [ ] 11. Create development documentation
+    - Setup S3 bucket for static website hosting
+    - Configure CORS rules for frontend origin
+    - Configure bucket policy for public read access
+    - Document deployment process
+    - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
 
-  - [ ] 11.1 Write setup instructions
-
-    - Document local development setup steps
-    - List required environment variables
-    - Provide Docker commands for running locally
-    - _Requirements: 7.1, 7.2, 7.3, 7.4_
-
-  - [ ] 11.2 Document API endpoints
-    - Create API documentation for /api/chat endpoint
-    - Document request/response formats
-    - Include example requests and responses
-    - _Requirements: 6.1, 6.2, 6.3_
+  - [x] 10.2 Create Cloudfront distribution
+    - Configure S3 bucket as the origin
+    - Modify the Makefile for deploying the frontend
+    - Document deployment process
+    - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_

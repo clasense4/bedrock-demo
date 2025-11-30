@@ -17,20 +17,27 @@ app = FastAPI(title="Bedrock Chat API", version="0.1.0")
 chat_engine: ChatEngine = None
 
 # Get frontend URL from environment
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:8080")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "*")
 
 # Configure CORS
-origins = [
-    FRONTEND_URL,
-    "http://localhost:8080",  # Local development
-    "http://127.0.0.1:8080",  # Alternative localhost
-]
+# In production, FRONTEND_URL should be set to the CloudFront domain
+# For development, we allow localhost
+if FRONTEND_URL == "*":
+    # Allow all origins (useful for development or when using API Gateway CORS)
+    origins = ["*"]
+else:
+    # Allow specific origins
+    origins = [
+        FRONTEND_URL,
+        "http://localhost:8080",  # Local development
+        "http://127.0.0.1:8080",  # Alternative localhost
+    ]
 
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=True,
+    allow_credentials=False if FRONTEND_URL == "*" else True,
     allow_methods=["*"],
     allow_headers=["*"],
 )

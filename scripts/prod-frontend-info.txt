@@ -1,0 +1,13 @@
+CloudFront Distribution Information
+====================================
+Distribution ID: E1OUG5KAG8ELSQ
+CloudFront URL: https://d3w0h6go13esk2.cloudfront.net
+S3 Website URL: http://bedrock-chat-prod-frontend.s3-website-us-east-1.amazonaws.com
+S3 Bucket: bedrock-chat-prod-frontend
+Region: us-east-1
+
+Status: Deploying (check:
+  aws cloudfront get-distribution --id E1OUG5KAG8ELSQ --query 'Distribution.Status'
+)
+
+Created: Sun Nov 30 02:07:09 PM WIB 2025

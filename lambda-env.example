@@ -1,0 +1,13 @@
+# Lambda Environment Variables Configuration
+# Copy this file and configure for your Lambda function
+
+# AWS Bedrock Configuration
+KNOWLEDGE_BASE_ID=your-knowledge-base-id-here
+AWS_REGION=us-east-1
+BEDROCK_MODEL_ID=nova-micro-v1:0
+
+# CORS Configuration
+FRONTEND_URL=https://your-cloudfront-domain.cloudfront.net
+
+# Optional: Logging Level
+LOG_LEVEL=INFO

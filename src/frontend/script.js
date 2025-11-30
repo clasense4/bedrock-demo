@@ -5,7 +5,7 @@ const messageLog = document.getElementById('message-log');
 const thinkingIndicator = document.getElementById('thinking-indicator');
 
 // Configure API base URL for local vs production
-const API_BASE_URL = window.location.hostname === 'localhost' 
+const API_BASE_URL = window.location.hostname === 'localhost'
     ? 'http://localhost:8000'
     : window.location.origin;
 
@@ -82,7 +82,7 @@ async function sendMessage() {
         }
 
         const data = await response.json();
-        
+
         // Display agent response
         displayAgentMessage(data.reply);
 
@@ -91,7 +91,7 @@ async function sendMessage() {
         // - Timeout errors (AbortError)
         // - Network errors (fetch failures)
         // - API errors (HTTP error responses)
-        
+
         if (error.name === 'AbortError') {
             // Timeout error
             console.error('Request timeout after 30 seconds');
@@ -102,7 +102,7 @@ async function sendMessage() {
             // API error or other errors
             console.error('Error:', error);
         }
-        
+
         // Display consistent error message for all error types
         displayError('Oops — the server had a hiccup. Try again!');
     } finally {
@@ -121,7 +121,7 @@ function displayUserMessage(text, skipSave = false) {
     messageElement.className = 'message user';
     messageElement.textContent = text;
     messageLog.appendChild(messageElement);
-    
+
     // Scroll to bottom
     messageLog.scrollTop = messageLog.scrollHeight;
 
@@ -141,7 +141,7 @@ function displayAgentMessage(text, skipSave = false) {
     messageElement.className = 'message agent';
     messageElement.textContent = text;
     messageLog.appendChild(messageElement);
-    
+
     // Scroll to bottom
     messageLog.scrollTop = messageLog.scrollHeight;
 
@@ -160,7 +160,7 @@ function displayError(message) {
     errorElement.className = 'error-message';
     errorElement.textContent = message;
     messageLog.appendChild(errorElement);
-    
+
     // Scroll to bottom
     messageLog.scrollTop = messageLog.scrollHeight;
 }
@@ -237,7 +237,7 @@ function loadFromLocalStorage() {
         }
 
         const history = JSON.parse(stored);
-        
+
         // Display each message in chronological order
         history.forEach(message => {
             if (message.role === 'user') {

@@ -54,11 +54,11 @@ class ChatEngine:
         """Create a memory tool configured with the knowledge base"""
         kb_id = self.knowledge_base_id
         region = self.region
-        
+
         @tool
         def memory(query: str, min_score: float = 0.4, max_results: int = 9) -> str:
             """Search the knowledge base for relevant information.
-            
+
             Args:
                 query: The search query
                 min_score: Minimum relevance score (0-1)
@@ -75,23 +75,23 @@ class ChatEngine:
                         }
                     }
                 )
-                
+
                 results = []
                 for item in response.get('retrievalResults', []):
                     score = item.get('score', 0)
                     if score >= min_score:
                         content = item.get('content', {}).get('text', '')
                         results.append(f"[Score: {score:.2f}] {content}")
-                
+
                 if not results:
                     return "No relevant information found in the knowledge base."
-                
+
                 return "\n\n".join(results)
-                
+
             except Exception as e:
                 logger.error(f"Memory tool error: {str(e)}")
                 return f"Error retrieving information: {str(e)}"
-        
+
         return memory
 
     def _create_agent(self) -> Agent:
@@ -104,7 +104,7 @@ class ChatEngine:
         try:
             # Create custom memory tool with KB configuration
             memory_tool = self._create_memory_tool()
-            
+
             # Create agent with memory tool
             agent = Agent(
                 tools=[memory_tool],
