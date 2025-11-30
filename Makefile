@@ -82,7 +82,7 @@ prod-preparation:
 		echo "  Create it from .env.prod.example"; \
 	else \
 		echo "✓ .env.prod file exists"; \
-		. .env.prod && echo "✓ KNOWLEDGE_BASE_ID: $$KNOWLEDGE_BASE_ID"; \
+		echo "✓ KNOWLEDGE_BASE_ID: $$(grep '^KNOWLEDGE_BASE_ID=' .env.prod | cut -d'=' -f2)"; \
 	fi
 	@echo ""
 	@echo "Testing AWS connectivity..."
