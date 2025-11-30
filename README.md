@@ -87,6 +87,15 @@ A minimal chat interface powered by AWS Bedrock Knowledge Base, built with FastA
 
    **Important:** Make sure to delete all S3 objects and versions before destroying.
 
+8. If you encounter error: unexpected state 'DELETE_UNSUCCESSFUL', during destroying the bedrock stack
+
+   - Change the Data Source, go to: https://us-east-1.console.aws.amazon.com/bedrock/home?region=us-east-1#/knowledge-bases/
+   - Choose the Knowledge Base: bedrock-demo-kb
+   - Edit Data Source: bedrock-demo-web-crawler
+   - Click Advance Settings
+   - Change Data Deletion policy to RETAIN, then submit
+   - Run the terraform destroy again
+
 ### Local Development
 
 1. Copy environment variables:
